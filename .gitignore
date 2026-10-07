@@ -1,0 +1,25 @@
+# Local-only data pack — never commit the database or the product photos.
+# See README.md for where to get these and where to put them back.
+data/
+*.db
+*.sqlite
+*.sqlite3
+
+# Secrets — copy .env.example to .env and fill in your own key.
+.env
+.env.local
+backend/.env
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Node / Vite
+node_modules/
+dist/
+.vite/
+
+# OS cruft
+.DS_Store
+Thumbs.db

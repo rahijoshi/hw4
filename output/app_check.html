@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Campus Customs — Live App Check</title>
+<style>
+  :root {
+    --yale-blue: #00356b;
+    --yale-blue-dark: #002147;
+    --gold: #bd9b60;
+    --ink: #1a1d23;
+    --muted: #5d6673;
+    --line: #e2e6ec;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--ink);
+    background: #fbf6ec;
+    line-height: 1.55;
+  }
+  header {
+    background: var(--yale-blue);
+    color: #fff;
+    padding: 1.8rem 1.5rem;
+  }
+  header h1 {
+    margin: 0 0 0.3rem;
+    font-size: 1.6rem;
+  }
+  header p {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.82);
+    font-size: 0.95rem;
+  }
+  main {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 3rem;
+  }
+  section.check {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 1.6rem 1.8rem 1.9rem;
+    margin-bottom: 2.2rem;
+    box-shadow: 0 2px 10px rgba(0, 33, 71, 0.06);
+  }
+  section.check h2 {
+    margin: 0 0 0.3rem;
+    color: var(--yale-blue-dark);
+    font-size: 1.3rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+  .check-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: var(--gold);
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .what-it-tests {
+    font-size: 0.85rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--gold);
+    font-weight: 700;
+    margin: 0 0 1rem;
+  }
+  .screenshot {
+    display: block;
+    width: 100%;
+    max-width: 880px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    margin: 0.4rem 0 1rem;
+  }
+  .caption {
+    font-size: 0.98rem;
+    color: var(--ink);
+    max-width: 70ch;
+  }
+  .caption strong {
+    color: var(--yale-blue-dark);
+  }
+  code {
+    background: #f1f3f6;
+    padding: 0.12rem 0.4rem;
+    border-radius: 4px;
+    font-size: 0.88em;
+  }
+  .ground-truth {
+    margin-top: 0.8rem;
+    padding: 0.7rem 1rem;
+    background: #fbf6ec;
+    border-left: 3px solid var(--gold);
+    border-radius: 0 6px 6px 0;
+    font-size: 0.88rem;
+    color: var(--muted);
+  }
+  footer {
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.85rem;
+    padding: 1rem 1.5rem 2.5rem;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Campus Customs — Live App Check</h1>
+  <p>Three checks against the real running site: real FastAPI backend, real SQLite database, real PydanticAI agent call. No mocked data.</p>
+</header>
+
+<main>
+
+  <section class="check">
+    <h2><span class="check-number">1</span> Chat gives honest stock &amp; price from the database</h2>
+    <p class="what-it-tests">Proves: the agent answers from a live database lookup, not a guess</p>
+    <img class="screenshot" src="app_check_images/inventory_check.png" alt="Chat conversation asking the price and medium-size stock of the Football Left Chest T Shirt" />
+    <p class="caption">
+      Asked the shop assistant: <em>"What's the price of the Football Left Chest T Shirt, and do you have a medium in stock?"</em>
+      It replied: <strong>"The Football Left Chest T Shirt is $32. Medium is currently out of stock."</strong>
+      That's a real, non-trivial answer — a product that <em>is</em> for sale but happens to be sold out in one
+      specific size — meaning the agent checked the actual inventory row for that size rather than giving a generic
+      "yes, in stock" answer.
+    </p>
+    <div class="ground-truth">
+      <strong>Ground truth (queried directly from <code>campus_customs.db</code>):</strong>
+      <code>catalogue.price = 32.0</code>, <code>inventory.quantity = 0</code> for
+      <code>(product_id='football-left-chest-t-shirt', size='M')</code>. Both numbers in the reply match exactly.
+    </div>
+  </section>
+
+  <section class="check">
+    <h2><span class="check-number">2</span> A category question dynamically populates product cards</h2>
+    <p class="what-it-tests">Proves: the agent's structured matches render live on the page, not only inside the chat bubble</p>
+    <img class="screenshot" src="app_check_images/search_results.png" alt="A 'Results for What hoodies do you have' shelf of product cards appearing on the page next to the chat panel" />
+    <p class="caption">
+      Asked: <em>"What hoodies do you have?"</em> A <strong>"Results for &ldquo;What hoodies do you have?&rdquo;"</strong>
+      banner appeared on the page itself — not just inside the chat panel — holding real product cards (image, name,
+      price, color swatches) for every hoodie the agent found. The chat reply lists the same products the cards show,
+      confirming the agent's structured output is what actually drove what appeared on the page.
+    </p>
+    <div class="ground-truth">
+      <strong>Ground truth:</strong> the shelf shows 10 cards, the agent's own reply cap
+      (<code>MAX_SEARCH_RESULTS = 10</code> in <code>backend/tools.py</code>); every product shown (Basic Hoodie Big
+      Yale, Brooks Brothers Double Knit, Champion Full Zip Hood, …) is a real row in the <code>catalogue</code> table
+      with category <code>Hoodies</code>.
+    </div>
+  </section>
+
+  <section class="check">
+    <h2><span class="check-number">3</span> Usability feature (Problem 9) — Favorites filter</h2>
+    <p class="what-it-tests">Proves: the saved-items wishlist actually narrows the catalogue to what was hearted</p>
+    <img class="screenshot" src="app_check_images/favorites_filter.png" alt="Products page filtered to two hearted favorite items, with the Favorites chip active and showing a count of 2" />
+    <p class="caption">
+      Hearted two products on the Products page (<strong>2025 Yale Vs Harvard T Shirt</strong> and
+      <strong>Baseball Left Chest Crewneck</strong>), then clicked the <strong>"♥ Favorites (2)"</strong> chip. The
+      grid narrowed from all 102 products down to exactly those two, and the result count reads
+      <strong>"2 items in your favorites."</strong> This is the no-account-needed wishlist from Problem 9 — saved in
+      the browser, nothing sent to the backend for it.
+    </p>
+    <div class="ground-truth">
+      <strong>Ground truth:</strong> the chip's count and the grid's contents came from reading
+      <code>localStorage["campus-customs-favorites"]</code> back out and filtering the same product list the
+      Products page already fetched — no server round-trip, confirmed in <code>src/favorites.tsx</code> /
+      <code>src/pages/Products.tsx</code>.
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  Campus Customs — MGT 409 HW 4, Problem 11. Screenshots captured against the live dev site
+  (React/Vite frontend + FastAPI backend + PydanticAI agent) via a real, automated browser session.
+</footer>
+
+</body>
+</html>
