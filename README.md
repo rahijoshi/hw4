@@ -41,9 +41,11 @@ AI_prompts.md       the prompt log for this assignment, one section per problem
 ### 1. Get the code
 
 ```bash
-git clone <this-repo-url> hw4
+git clone git@github.com:rahijoshi/hw4.git
 cd hw4
 ```
+
+(Or, over HTTPS: `git clone https://github.com/rahijoshi/hw4.git`.)
 
 ### 2. Place the data pack
 
